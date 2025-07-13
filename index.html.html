@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aggressive Todo List</title>
+   
+    <!-- PWA manifest -->
+    <link rel="manifest" href="manifest.json">
+   
+    <!-- iOS specific meta tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="AggroTodo">
+   
+    <!-- Theme color -->
+    <meta name="theme-color" content="#ff6b6b">
+   
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="icon-192.png">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Creepster&family=Permanent+Marker&family=Graffiti&family=Rubik+Spray+Paint&family=Bungee+Shade&family=Nosifer&display=swap');
+       
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+       
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Courier New', monospace;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+       
+        .notebook {
+            width: 100%;
+            max-width: 600px;
+            background: #fff;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            position: relative;
+            min-height: 80vh;
+            background-image:
+                repeating-linear-gradient(
+                    transparent,
+                    transparent 24px,
+                    #a8dadc 24px,
+                    #a8dadc 26px
+                ),
+                linear-gradient(to right, transparent 50px, #ff6b6b 50px, #ff6b6b 53px, transparent 53px);
+            background-size: 100% 26px, 100% 100%;
+            background-position: 0 110px, 0 0;
+            padding: 80px 20px 20px 60px;
+        }
+       
+        .title {
+            font-family: 'Nosifer', cursive;
+            font-size: 52px;
+            color: #2d3436;
+            text-align: center;
+            margin-bottom: 25px;
+            margin-top: -50px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.4);
+            transform: rotate(-1deg);
+            letter-spacing: 3px;
+        }
+       
+        .motivational-message {
+            background: #ff6b6b;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            font-size: 16px;
+            text-align: center;
+            border: 3px solid #e55353;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            animation: pulse 2s infinite;
+        }
+       
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+       
+        .input-container {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+       
+        .todo-input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #636e72;
+            border-radius: 5px;
+            font-size: 16px;
+            font-family: 'Courier New', monospace;
+            background: rgba(255,255,255,0.9);
+        }
+       
+        .add-btn {
+            padding: 10px 20px;
+            background: #00b894;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+       
+        .add-btn:hover {
+            background: #00a085;
+        }
+       
+        .todo-list {
+            list-style: none;
+        }
+       
+        .todo-item {
+            background: rgba(255,255,255,0.8);
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #0984e3;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+            position: relative;
+            transition: all 0.3s;
+        }
+       
+        .todo-item.completed {
+            text-decoration: line-through;
+            opacity: 0.7;
+            border-left-color: #00b894;
+        }
+       
+        .todo-item.completed::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            right: 0;
+            height: 2px;
+            background: #e17055;
+            transform: translateY(-50%);
+        }
+       
+        .todo-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+       
+        .todo-text {
+            flex: 1;
+            cursor: pointer;
+        }
+       
+        .delete-btn {
+            background: #e17055;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.3s;
+        }
+       
+        .delete-btn:hover {
+            background: #d63031;
+        }
+       
+        .stats {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(116, 185, 255, 0.1);
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+       
+        .welcome-message {
+            background: #fdcb6e;
+            color: #2d3436;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            font-size: 16px;
+            text-align: center;
+            border: 3px solid #e17055;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+       
+        .hidden {
+            display: none;
+        }
+       
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #e17055;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+            z-index: 1000;
+            animation: slideIn 0.5s ease-out;
+        }
+       
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="notebook">
+        <h1 class="title">TO DO</h1>
+       
+        <div id="welcomeMessage" class="welcome-message">
+            Well it's about goddamn time you opened this!
+        </div>
+       
+        <div id="motivationalMessage" class="motivational-message hidden">
+            Hey fuckhead, you ain't crossed nothing off this list yet!
+        </div>
+       
+        <div class="input-container">
+            <input type="text" class="todo-input" id="todoInput" placeholder="What do you need to get done, slacker?" maxlength="100">
+            <button class="add-btn" onclick="addTodo()">Add Task</button>
+        </div>
+       
+        <ul class="todo-list" id="todoList"></ul>
+       
+        <div class="stats" id="stats">
+            No tasks yet. Stop procrastinating and add something!
+        </div>
+    </div>
+
+    <script>
+        let todos = [];
+        let lastActivity = Date.now();
+        let motivationInterval;
+        let hasShownWelcome = false;
+       
+        const aggressiveMessages = [
+            "Hey fuckhead, you ain't crossed nothing off this list yet!",
+            "You're never going to accomplish anything in life if you don't get shit done!",
+            "Do you want to be a loser forever?",
+            "Hell, why bother to even make the list if you're not going to do shit, pussy?",
+            "Stop being a lazy ass and check something off!",
+            "Your future self is going to hate you for this procrastination!",
+            "Move your ass and get something done!",
+            "Time's wasting while you're sitting there doing nothing!",
+            "What are you waiting for, a fucking miracle?",
+            "Get off your lazy ass and be productive!"
+        ];
+       
+        const welcomeMessages = [
+            "Well it's about goddamn time you opened this!",
+            "Oh look who it is, the procrastinator returns!",
+            "Decided to finally check your list, huh?",
+            "Back for more punishment, I see!",
+            "Ready to actually do something today?"
+        ];
+       
+        const completionMessages = [
+            "About fucking time you did something!",
+            "Look at you being all productive and shit!",
+            "Finally! One less thing to nag you about!",
+            "Well I'll be damned, you actually did it!",
+            "Progress! Keep your ass moving!"
+        ];
+       
+        function showWelcomeMessage() {
+            if (!hasShownWelcome) {
+                const welcomeDiv = document.getElementById('welcomeMessage');
+                const randomMessage = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
+                welcomeDiv.textContent = randomMessage;
+                welcomeDiv.classList.remove('hidden');
+               
+                setTimeout(() => {
+                    welcomeDiv.classList.add('hidden');
+                }, 4000);
+               
+                hasShownWelcome = true;
+            }
+        }
+       
+        function showMotivationalMessage() {
+            const messageDiv = document.getElementById('motivationalMessage');
+            const randomMessage = aggressiveMessages[Math.floor(Math.random() * aggressiveMessages.length)];
+            messageDiv.textContent = randomMessage;
+            messageDiv.classList.remove('hidden');
+           
+            // Also show as notification
+            showNotification(randomMessage);
+           
+            setTimeout(() => {
+                messageDiv.classList.add('hidden');
+            }, 5000);
+        }
+       
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+           
+            setTimeout(() => {
+                notification.remove();
+            }, 4000);
+        }
+       
+        function startMotivationTimer() {
+            clearInterval(motivationInterval);
+            motivationInterval = setInterval(() => {
+                const now = Date.now();
+                const timeSinceActivity = now - lastActivity;
+                const incompleteTasks = todos.filter(todo => !todo.completed).length;
+               
+                // Show aggressive message if no activity for 3 minutes (180000ms) and there are incomplete tasks
+                if (timeSinceActivity > 180000 && incompleteTasks > 0) {
+                    showMotivationalMessage();
+                    lastActivity = now; // Reset timer after showing message
+                }
+            }, 60000); // Check every minute
+        }
+       
+        function addTodo() {
+            const input = document.getElementById('todoInput');
+            const text = input.value.trim();
+           
+            if (text) {
+                const todo = {
+                    id: Date.now(),
+                    text: text,
+                    completed: false,
+                    createdAt: Date.now()
+                };
+               
+                todos.push(todo);
+                input.value = '';
+                renderTodos();
+                updateStats();
+                updateActivity();
+            }
+        }
+       
+        function toggleTodo(id) {
+            const todo = todos.find(t => t.id === id);
+            if (todo) {
+                todo.completed = !todo.completed;
+               
+                if (todo.completed) {
+                    const message = completionMessages[Math.floor(Math.random() * completionMessages.length)];
+                    showNotification(message);
+                }
+               
+                renderTodos();
+                updateStats();
+                updateActivity();
+            }
+        }
+       
+        function deleteTodo(id) {
+            todos = todos.filter(t => t.id !== id);
+            renderTodos();
+            updateStats();
+            updateActivity();
+        }
+       
+        function renderTodos() {
+            const todoList = document.getElementById('todoList');
+            todoList.innerHTML = '';
+           
+            todos.forEach(todo => {
+                const li = document.createElement('li');
+                li.className = `todo-item ${todo.completed ? 'completed' : ''}`;
+               
+                li.innerHTML = `
+                    <input type="checkbox" class="todo-checkbox" ${todo.completed ? 'checked' : ''}
+                           onchange="toggleTodo(${todo.id})">
+                    <span class="todo-text" onclick="toggleTodo(${todo.id})">${todo.text}</span>
+                    <button class="delete-btn" onclick="deleteTodo(${todo.id})">Delete</button>
+                `;
+               
+                todoList.appendChild(li);
+            });
+        }
+       
+        function updateStats() {
+            const statsDiv = document.getElementById('stats');
+            const total = todos.length;
+            const completed = todos.filter(t => t.completed).length;
+            const remaining = total - completed;
+           
+            if (total === 0) {
+                statsDiv.textContent = "No tasks yet. Stop procrastinating and add something!";
+            } else if (remaining === 0) {
+                statsDiv.textContent = `Holy shit! You actually finished everything! ${completed} tasks completed!`;
+            } else {
+                statsDiv.textContent = `${remaining} tasks left to stop being lazy about. ${completed}/${total} completed.`;
+            }
+        }
+       
+        function updateActivity() {
+            lastActivity = Date.now();
+        }
+       
+        // Event listeners
+        document.getElementById('todoInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addTodo();
+            }
+        });
+       
+        document.addEventListener('click', updateActivity);
+        document.addEventListener('keypress', updateActivity);
+       
+        // Initialize
+        showWelcomeMessage();
+        startMotivationTimer();
+        renderTodos();
+        updateStats();
+       
+        // Register service worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch(registrationError => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+    </script>
+</body>
+</html> 
